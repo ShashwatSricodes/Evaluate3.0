@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test API</title>
+</head>
+<body>
+    <h2>Upload Answer Sheet</h2>
+    <form id="uploadForm">
+        <label for="image">Select Image:</label>
+        <input type="file" id="image" required><br><br>
+
+        <div id="qaContainer">
+            <div class="qa-pair">
+                <input type="text" class="question" placeholder="Enter Question" required>
+                <input type="text" class="answer" placeholder="Enter Answer" required>
+            </div>
+        </div>
+        <button type="button" onclick="addQAPair()">Add Question-Answer</button><br><br>
+
+        <label for="difficulty">Difficulty:</label>
+        <select id="difficulty" required>
+            <option value="Easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+        </select><br><br>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        function addQAPair() {
+            const container = document.getElementById("qaContainer");
+            const div = document.createElement("div");
+            div.classList.add("qa-pair");
+            div.innerHTML = `
+                <input type="text" class="question" placeholder="Enter Question" required>
+                <input type="text" class="answer" placeholder="Enter Answer" required>
+            `;
+            container.appendChild(div);
+        }
+
+        document.getElementById("uploadForm").addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const imageFile = document.getElementById("image").files[0];
+            if (!imageFile) {
+                alert("Please select an image.");
+                return;
+            }
+
+            const qaPairs = [];
+            document.querySelectorAll(".qa-pair").forEach(pair => {
+                const question = pair.querySelector(".question").value.trim();
+                const answer = pair.querySelector(".answer").value.trim();
+                if (question && answer) {
+                    qaPairs.push({ question, answer });
+                }
+            });
+
+            if (qaPairs.length === 0) {
+                alert("Please add at least one question-answer pair.");
+                return;
+            }
+
+            const difficulty = document.getElementById("difficulty").value;
+
+            const formData = new FormData();
+            formData.append("image", imageFile);
+            formData.append("referenceAnswers", JSON.stringify(qaPairs));
+            formData.append("difficulty", difficulty);
+
+            try {
+                const response = await fetch("http://localhost:5000/api/evaluations", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    alert("Evaluation created successfully! ID: " + data.id);
+                } else {
+                    alert("Error: " + data.error);
+                }
+            } catch (error) {
+                alert("Request failed: " + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Evaluation</title>
+</head>
+<body>
+    <h2>Fetch Evaluation</h2>
+    <label for="evaluationId">Enter Evaluation ID:</label>
+    <input type="text" id="evaluationId" placeholder="Enter ID">
+    <button onclick="fetchEvaluation()">Get Evaluation</button>
+
+    <h3>Results:</h3>
+    <pre id="result"></pre>
+
+    <script>
+        async function fetchEvaluation() {
+            const id = document.getElementById("evaluationId").value.trim();
+            if (!id) {
+                alert("Please enter an evaluation ID.");
+                return;
+            }
+
+            const response = await fetch(`http://localhost:5000/api/data?id=${id}`);
+            const data = await response.json();
+
+            document.getElementById("result").textContent = JSON.stringify(data, null, 2);
+        }
+    </script>
+</body>
+</html>
